@@ -1,9 +1,8 @@
-// Import necessary Firebase SDKs
 import { initializeApp } from 'firebase/app';
-import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth'; // Correct imports
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'; // For AsyncStorage support
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
-// Your Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: 'AIzaSyC7mQFz_F6dPOvrZhEMz_R_BalfR4PDQE8',
   authDomain: 'learn-auth-ff6fe.firebaseapp.com',
@@ -14,9 +13,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-export const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Authentication
-const auth = getAuth(app);
+// Initialize Auth with AsyncStorage
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+});
 
-export { auth };  // Export the auth instance
+export { app, auth };
