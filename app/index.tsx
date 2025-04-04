@@ -10,22 +10,24 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
-import { app } from '../firebaseConfig'; // Ensure path is correct
+import { app } from '../firebaseConfig';
+import { useRouter } from 'expo-router';
+import Feather from 'react-native-vector-icons/Feather'; // Import Feather icons
 
-const auth = getAuth(app); // Initialize Firebase Auth
+const auth = getAuth(app);
 
 const Index = () => {
+  // MY STATE SETTERS
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const router = useRouter();
 
+  // AUTH LOGIC
   const handleAuth = async () => {
     setLoading(true);
     try {
@@ -35,6 +37,7 @@ const Index = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         Alert.alert('Success', 'Successfully signed in!');
+        router.replace('/landing'); // No need for "./landing"
       }
     } catch (error) {
       if (error instanceof FirebaseError) {
@@ -70,6 +73,7 @@ const Index = () => {
       <View style={styles.box}>
         <Text style={styles.title}>{isSignUp ? 'Create Account' : 'Welcome Back'}</Text>
 
+        {/* Email Input */}
         <TextInput
           placeholder="Email"
           value={email}
@@ -78,23 +82,33 @@ const Index = () => {
           style={styles.input}
           placeholderTextColor="#aaa"
         />
-        <TextInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#aaa"
-        />
 
+        {/* Password Input with Eye Icon */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!isPasswordVisible}
+            style={styles.passwordInput}
+            placeholderTextColor="#aaa"
+          />
+          <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+            <Feather
+              name={isPasswordVisible ? 'eye' : 'eye-off'}
+              size={20}
+              color="#666"
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Authentication Button */}
         <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>{isSignUp ? 'Sign Up' : 'Sign In'}</Text>
-          )}
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{isSignUp ? 'Sign Up' : 'Sign In'}</Text>}
         </TouchableOpacity>
 
+        {/* Toggle Sign Up / Sign In */}
         <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
           <Text style={styles.link}>
             {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
@@ -105,6 +119,7 @@ const Index = () => {
   );
 };
 
+// STYLESHEET
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -123,7 +138,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
-    elevation: 5, // For Android shadow
+    elevation: 5,
   },
   title: {
     fontSize: 26,
@@ -141,6 +156,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 15,
     color: '#333',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    height: 45,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+  },
+  icon: {
+    marginLeft: 10,
   },
   button: {
     width: '100%',
